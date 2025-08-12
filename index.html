@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagode do Gil 5.0 — Convidados & Compras</title>
+<meta name="theme-color" content="#111827">
+<style>
+  :root{ --bg:#0b1020; --card:#121a35; --muted:#94a3b8; --text:#e5e7eb; --accent:#7c3aed;
+         --accent-2:#22d3ee; --danger:#ef4444; --ok:#10b981; --border:rgba(148,163,184,.16); }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#0b1020;color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+  a{color:var(--accent-2);text-decoration:none}
+  header{position:sticky;top:0;background:rgba(11,16,32,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);z-index:50}
+  .wrap{max-width:1100px;margin:auto;padding:16px}
+  .title{display:flex;gap:12px;align-items:center}
+  .badge{font-size:12px;border:1px solid var(--border);padding:2px 8px;border-radius:999px;color:var(--muted)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:#0e1630;cursor:pointer}
+  .tab.active{border-color:var(--accent);outline:2px solid rgba(124,58,237,.25)}
+  .grid{display:grid;gap:16px}
+  @media (min-width:900px){ .grid-2{grid-template-columns:1.2fr .8fr} }
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .card h3{margin:0 0 8px}
+  label{font-size:12px;color:var(--muted)}
+  input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0b1228;color:var(--text)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0e1630;color:var(--text);cursor:pointer}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#2563eb);border:none}
+  .btn.ghost{background:transparent;border-color:var(--border)}
+  .btn.danger{background:#1a0e0e;border-color:#3b1a1a;color:#fecaca}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+  th{color:var(--muted);font-weight:600}
+  .stat{display:flex;flex-direction:column;gap:4px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#0e1630}
+  .note{font-size:12px;color:var(--muted)}
+  .right{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+  .divider{height:1px;background:var(--border);margin:8px 0 16px}
+  .pill{padding:8px 10px;border-radius:999px;background:#0b1228;border:1px solid var(--border);font-size:12px}
+  @media (max-width:800px){ .row,.row-3,.grid-2{grid-template-columns:1fr} header .wrap{padding:12px}}
+  .banner{border:1px dashed var(--border);border-radius:12px;padding:12px;color:#cbd5e1;background:#0b1228}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="title">
+      <div style="font-weight:800;font-size:18px;">Pagode do Gil 5.0</div>
+      <div class="badge">30 de agosto • Mairiporã</div>
+      <div id="mode-badge" class="badge" style="margin-left:8px">Admin</div>
+    </div>
+    <div class="tabs" style="margin-top:10px" id="tabs">
+      <button class="tab active" data-tab="convidados">Convidados</button>
+      <button class="tab" data-tab="consumo">Consumo & Compras</button>
+      <button class="tab" data-tab="rsvp">Convite & RSVP</button>
+      <button class="tab" data-tab="backup">Exportar/Backup</button>
+      <span style="flex:1"></span>
+      <button class="tab" id="open-guest">Abrir modo Convidado</button>
+      <button class="tab" id="sync-backend">Sincronizar</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:14px">
+  <!-- ADMIN -->
+  <section id="convidados" class="grid grid-2">
+    <div class="card">
+      <h3>Adicionar convidado</h3>
+      <div class="row">
+        <div>
+          <label>Nome</label>
+          <input id="g-nome" placeholder="Ex.: Jackson; Vanessa; Lucas">
+        </div>
+        <div>
+          <label>Grupo</label>
+          <select id="g-grupo">
+            <option value="Família">Família</option>
+            <option value="Amigos">Amigos</option>
+            <option value="Colegas Bradesco">Colegas Bradesco</option>
+            <option value="Diretores Bradesco">Diretores Bradesco</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Pessoas no convite</label>
+          <input id="g-qtd" type="number" min="1" value="1">
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="g-status">
+            <option>Sem resposta</option>
+            <option>Confirmado</option>
+            <option>Não irá</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Observações</label>
+          <input id="g-notas" placeholder="Ex.: vegetariano, sem álcool, etc.">
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <button class="btn primary" id="add">Adicionar</button>
+          <button class="btn ghost" id="clear-form">Limpar</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid" id="kpis"></div>
+    </div>
+
+    <div class="card">
+      <h3>Resumo</h3>
+      <div class="grid">
+        <div class="stat"><span>Total de convites</span><strong id="k-total">0</strong></div>
+        <div class="stat"><span>Pessoas estimadas</span><strong id="k-pessoas">0</strong></div>
+        <div class="stat"><span>Confirmados</span><strong id="k-conf">0</strong></div>
+        <div class="stat"><span>Sem resposta</span><strong id="k-sem">0</strong></div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <label>Considerar % dos “Sem resposta”</label>
+        <input id="considerar-sem" type="range" min="0" max="100" value="50" oninput="document.getElementById('considerar-sem-val').textContent=this.value+'%'">
+        <div class="right"><span class="pill" id="considerar-sem-val">50%</span></div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Margem de segurança (sobras)</label>
+        <input id="margem" type="range" min="0" max="40" value="15" oninput="document.getElementById('margem-val').textContent=this.value+'%'">
+        <div class="right"><span class="pill" id="margem-val">15%</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <h3>Lista de convidados</h3>
+        <div class="right">
+          <button class="btn ghost" id="importar">Importar CSV</button>
+          <button class="btn" id="baixar-csv">Baixar CSV</button>
+          <button class="btn danger" id="limpar-tudo">Limpar tudo</button>
+        </div>
+      </div>
+      <div class="note">Dica: para famílias, escreva “Jackson; Vanessa; Lucas” e defina “Pessoas no convite = 3”.</div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="tabela">
+          <thead>
+            <tr>
+              <th>Nome</th><th>Grupo</th><th>Pessoas</th><th>Status</th><th>Notas</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="consumo" class="grid grid-2" style="display:none">
+    <div class="card">
+      <h3>Consumo (Admin)</h3>
+      <div class="note">Somente o administrador vê esta área.</div>
+      <div class="row-3">
+        <div>
+          <label>Perfil</label>
+          <select id="perfil">
+            <option value="churrasco">Churrasco</option>
+            <option value="finger">Finger Food</option>
+            <option value="feijoada">Feijoada</option>
+            <option value="personalizado">Personalizado</option>
+          </select>
+        </div>
+        <div>
+          <label>Duração (h)</label>
+          <input id="duracao" type="number" min="1" value="6">
+        </div>
+        <div>
+          <label>Álcool por adulto (%)</label>
+          <input id="alcool-perc" type="number" min="0" max="100" value="65">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <h4 style="margin:0 0 8px">Itens e consumo por pessoa</h4>
+      <div id="itens-consumo"></div>
+    </div>
+
+    <div class="card">
+      <h3>Compras & orçamento (Admin)</h3>
+      <div class="grid">
+        <div class="stat"><span>Pessoas previstas</span><strong id="p-previstas">0</strong></div>
+        <div class="stat"><span>Orçamento total</span><strong id="orcamento-total">R$ 0,00</strong></div>
+      </div>
+      <div class="divider"></div>
+      <h4 style="margin:0 0 8px">Preços unitários (opcional)</h4>
+      <div id="precos"></div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="copiar-lista">Copiar lista</button>
+        <button class="btn ghost" id="imprimir">Imprimir</button>
+      </div>
+      <div class="divider"></div>
+      <div id="checklist"></div>
+    </div>
+  </section>
+
+  <section id="rsvp" style="display:none">
+    <div class="card">
+      <h3>Convite & RSVP (Admin)</h3>
+      <p>Defina seu WhatsApp e o <b>endpoint do backend</b> (opcional) para gravar RSVP automático.</p>
+      <div class="row">
+        <div>
+          <label>Seu WhatsApp (com DDI)</label>
+          <input id="zap" placeholder="Ex.: +55 11 90000-0000">
+        </div>
+        <div>
+          <label>URL do Backend (Apps Script)</label>
+          <input id="backend" placeholder="https://script.google.com/macros/s/XXXXXXXX/exec">
+        </div>
+      </div>
+      <div class="right" style="margin-top:8px">
+        <button class="btn primary" id="salvar-zap">Salvar</button>
+      </div>
+      <div class="divider"></div>
+      <div class="note">Para convidados, envie <b>?guest=1</b>. Se o Backend estiver configurado, os envios entram automaticamente na sua lista.</div>
+    </div>
+  </section>
+
+  <section id="backup" style="display:none">
+    <div class="card">
+      <h3>Exportar & Importar</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="exportar-json">Exportar dados (.json)</button>
+        <input type="file" id="import-json" accept="application/json" style="display:none">
+        <button class="btn ghost" id="importar-json">Importar .json</button>
+      </div>
+      <div class="note">Os dados ficam salvos no seu navegador (localStorage).</div>
+    </div>
+  </section>
+
+  <!-- GUEST -->
+  <section id="guest" style="display:none">
+    <div class="card banner">
+      <strong>Confirmação de Presença</strong>
+      <div class="note">Preencha e envie sua confirmação. Seus dados serão enviados ao organizador.</div>
+    </div>
+    <div class="card">
+      <h3>Seus dados</h3>
+      <div class="row">
+        <div>
+          <label>Nome</label>
+          <input id="c-nome" placeholder="Seu nome completo">
+        </div>
+        <div>
+          <label>Grupo</label>
+          <select id="c-grupo">
+            <option value="Família">Família</option>
+            <option value="Amigos">Amigos</option>
+            <option value="Colegas Bradesco">Colegas Bradesco</option>
+            <option value="Diretores Bradesco">Diretores Bradesco</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Pessoas no convite</label>
+          <input id="c-qtd" type="number" min="1" value="1">
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="c-status">
+            <option>Confirmado</option>
+            <option>Sem resposta</option>
+            <option>Não irá</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label>Observações</label>
+        <input id="c-notas" placeholder="Ex.: vegetariano, sem álcool, etc.">
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="enviar-rsvp">Enviar RSVP</button>
+      </div>
+      <div class="note" id="guest-note"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ======= Estado =======
+const LS_KEY = "gil_aniv_app_v4";
+let state = {
+  convidados: [], considerarSem: 50, margem: 15, perfil: "churrasco",
+  duracao: 6, alcoolPerc: 65, itens: {}, precos: {},
+  adminZap: "", backendURL: "", adminPin: "5050"
+};
+
+const DEFAULTS = {
+  churrasco: {"Carne (total)":{porPessoa:.35,unidade:"kg"},"Linguiça":{porPessoa:.1,unidade:"kg"},"Pão de alho":{porPessoa:.3,unidade:"un"},"Arroz":{porPessoa:.08,unidade:"kg"},"Farofa":{porPessoa:.04,unidade:"kg"},"Salada":{porPessoa:.06,unidade:"kg"},"Cerveja":{porPessoa:.7,unidade:"L",somenteAdulto:true},"Refrigerante/Suco":{porPessoa:.4,unidade:"L"},"Água":{porPessoa:.3,unidade:"L"},"Gelo":{porPessoa:.5,unidade:"kg"},"Carvão":{porPessoa:.3,unidade:"kg"}},
+  finger: {"Salgados/Canapés":{porPessoa:14,unidade:"un"},"Mini sanduíches":{porPessoa:2.5,unidade:"un"},"Docinhos":{porPessoa:4,unidade:"un"},"Refrigerante/Suco":{porPessoa:.4,unidade:"L"},"Água":{porPessoa:.3,unidade:"L"}},
+  feijoada: {"Feijão":{porPessoa:.12,unidade:"kg"},"Carnes (total)":{porPessoa:.25,unidade:"kg"},"Arroz":{porPessoa:.1,unidade:"kg"},"Farofa":{porPessoa:.05,unidade:"kg"},"Couve":{porPessoa:.06,unidade:"kg"},"Laranja":{porPessoa:.5,unidade:"un"},"Torresmo":{porPessoa:.06,unidade:"kg"},"Vinagrete":{porPessoa:.05,unidade:"kg"},"Cerveja":{porPessoa:.6,unidade:"L",somenteAdulto:true},"Refrigerante/Suco":{porPessoa:.4,unidade:"L"},"Água":{porPessoa:.3,unidade:"L"}}
+};
+
+// Utils
+const fmt = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+function money(v){ return isNaN(v)? "R$ 0,00" : fmt.format(v); }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function load(){ const s=localStorage.getItem(LS_KEY); if(s){ try{ state={...state,...JSON.parse(s)} }catch(e){} }}
+
+// Query params
+const params = new URLSearchParams(location.search);
+const IS_GUEST = params.get('guest') === '1';
+const PARAM_WA = (params.get('wa')||'').replace(/[^0-9]/g,'');
+const PARAM_PIN = (params.get('pin')||'');
+const PARAM_NAME = params.get('name')||'';
+
+// DOM helpers
+function show(id, on=true){ const el=document.getElementById(id); if(el) el.style.display = on? '' : 'none'; }
+
+// Tabs
+document.querySelectorAll('.tab').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    const id = el.getAttribute('data-tab');
+    document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
+    document.getElementById(id).style.display = '';
+  });
+});
+
+// ADMIN — Convidados
+function renderConvidados(){
+  const body = document.querySelector('#tabela tbody');
+  body.innerHTML = '';
+  state.convidados.forEach((c,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.nome}</td>
+      <td>${c.grupo}</td>
+      <td>${c.qtd}</td>
+      <td>
+        <select data-i="${i}" class="cell-status">
+          <option ${c.status==='Sem resposta'?'selected':''}>Sem resposta</option>
+          <option ${c.status==='Confirmado'?'selected':''}>Confirmado</option>
+          <option ${c.status==='Não irá'?'selected':''}>Não irá</option>
+        </select>
+      </td>
+      <td>${c.notas||''}</td>
+      <td style="text-align:right">
+        <button class="btn ghost" data-edit="${i}">Editar</button>
+        <button class="btn danger" data-del="${i}">Excluir</button>
+      </td>`;
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', e=>{
+    const i = +e.currentTarget.getAttribute('data-del');
+    state.convidados.splice(i,1); save(); refreshAll();
+  }));
+  body.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', e=>{
+    const i = +e.currentTarget.getAttribute('data-edit');
+    const c = state.convidados[i];
+    document.getElementById('g-nome').value = c.nome;
+    document.getElementById('g-grupo').value = c.grupo;
+    document.getElementById('g-qtd').value = c.qtd;
+    document.getElementById('g-status').value = c.status;
+    document.getElementById('g-notas').value = c.notas||'';
+    state.convidados.splice(i,1); save(); refreshAll();
+  }));
+  body.querySelectorAll('.cell-status').forEach(s=>s.addEventListener('change', e=>{
+    const i = +e.target.getAttribute('data-i');
+    state.convidados[i].status = e.target.value; save(); refreshAll();
+  }));
+
+  // KPIs por grupo
+  const grupos = ["Família","Amigos","Colegas Bradesco","Diretores Bradesco"];
+  const cont = {}; grupos.forEach(g=>cont[g]={convites:0,pessoas:0});
+  state.convidados.forEach(c=>{
+    if(!cont[c.grupo]) cont[c.grupo]={convites:0,pessoas:0};
+    cont[c.grupo].convites += 1;
+    if(c.status!=="Não irá") cont[c.grupo].pessoas += c.qtd;
+  });
+  const kpis = document.getElementById('kpis'); kpis.innerHTML='';
+  grupos.forEach(g=>{
+    const div = document.createElement('div'); div.className='stat';
+    div.innerHTML = `<span>${g}</span><strong>${cont[g].pessoas} pessoas</strong><span class="note">${cont[g].convites} convites</span>`;
+    kpis.appendChild(div);
+  });
+
+  // Totais
+  const totConvites = state.convidados.length;
+  const confirmados = state.convidados.filter(c=>c.status==="Confirmado").reduce((a,b)=>a+b.qtd,0);
+  const sem = state.convidados.filter(c=>c.status==="Sem resposta").reduce((a,b)=>a+b.qtd,0);
+  const previstos = Math.round(confirmados + (sem * state.considerarSem/100));
+  document.getElementById('k-total').textContent = totConvites;
+  document.getElementById('k-conf').textContent = confirmados;
+  document.getElementById('k-sem').textContent = sem;
+  document.getElementById('k-pessoas').textContent = previstos;
+
+  renderConsumo();
+}
+
+// Handlers admin
+document.getElementById('add').addEventListener('click', ()=>{
+  const nome = document.getElementById('g-nome').value.trim();
+  const grupo = document.getElementById('g-grupo').value;
+  const qtd = Math.max(1, parseInt(document.getElementById('g-qtd').value||'1'));
+  const status = document.getElementById('g-status').value;
+  const notas = document.getElementById('g-notas').value.trim();
+  if(!nome) return alert('Informe o nome');
+  state.convidados.push({nome, grupo, qtd, status, notas});
+  ['g-nome','g-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('g-qtd').value='1'; document.getElementById('g-status').value='Sem resposta';
+  save(); refreshAll();
+});
+document.getElementById('clear-form').addEventListener('click', ()=>{
+  ['g-nome','g-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('g-qtd').value='1'; document.getElementById('g-status').value='Sem resposta';
+});
+document.getElementById('considerar-sem').addEventListener('input', e=>{ state.considerarSem=+e.target.value; save(); refreshAll(); });
+document.getElementById('margem').addEventListener('input', e=>{ state.margem=+e.target.value; save(); refreshAll(); });
+document.getElementById('limpar-tudo').addEventListener('click', ()=>{ if(confirm('Apagar todos os convidados?')){ state.convidados=[]; save(); refreshAll(); }});
+
+// CSV import/export
+document.getElementById('baixar-csv').addEventListener('click', ()=>{
+  const rows = [['Nome','Grupo','Pessoas','Status','Notas']].concat(state.convidados.map(c=>[c.nome,c.grupo,c.qtd,c.status,c.notas||'']));
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='convidados.csv'; a.click();
+});
+document.getElementById('importar').addEventListener('click', ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.csv,text/csv';
+  inp.onchange = (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const lines = reader.result.split(/\r?\n/).filter(Boolean);
+      const data = lines.slice(1).map(line=>{
+        const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)||[];
+        const unq = cols.map(s=>s.replace(/^"|"$/g,'').replace(/""/g,'"'));
+        const [nome,grupo,qtd,status,notas] = unq;
+        if(nome) return {nome,grupo:grupo||'Amigos',qtd:+(qtd||1),status:status||'Sem resposta',notas:notas||''};
+      }).filter(Boolean);
+      state.convidados = state.convidados.concat(data); save(); refreshAll();
+    };
+    reader.readAsText(f,'utf-8');
+  };
+  inp.click();
+});
+
+// Consumo & Compras (ADMIN) — similar à versão anterior
+function setupItensPerfil(){
+  if(state.perfil!=='personalizado'){
+    state.itens = JSON.parse(JSON.stringify(DEFAULTS[state.perfil]));
+  } else if(Object.keys(state.itens).length===0){
+    state.itens = {"Item personalizado": {porPessoa: 1, unidade:"un"}};
+  }
+}
+function renderConsumo(){
+  setupItensPerfil();
+  const confirmados = state.convidados.filter(c=>c.status==="Confirmado").reduce((a,b)=>a+b.qtd,0);
+  const sem = state.convidados.filter(c=>c.status==="Sem resposta").reduce((a,b)=>a+b.qtd,0);
+  const previstosBase = (confirmados + (sem * state.considerarSem/100));
+  const pessoasPrev = Math.round(previstosBase * (1 + state.margem/100));
+  document.getElementById('p-previstas').textContent = pessoasPrev;
+
+  const list = document.getElementById('itens-consumo'); list.innerHTML='';
+  Object.entries(state.itens).forEach(([nome,meta])=>{
+    const row = document.createElement('div'); row.className='row';
+    row.innerHTML = `
+      <div><label>Item</label><input value="${nome}" data-item="${nome}" class="inp-item-nome"></div>
+      <div><label>Qtd por pessoa</label><input type="number" step="0.01" value="${meta.porPessoa}" data-item="${nome}" class="inp-item-qtd"></div>
+      <div><label>Unidade</label><input value="${meta.unidade}" data-item="${nome}" class="inp-item-und"></div>
+      <div><label class="note"><input type="checkbox" ${meta.somenteAdulto?'checked':''} data-item="${nome}" class="inp-item-adulto"> Só adulto</label></div>`;
+    list.appendChild(row);
+  });
+  const add = document.createElement('button'); add.className='btn'; add.textContent='Adicionar item';
+  add.onclick = ()=>{ const novo='Novo item '+(Object.keys(state.itens).length+1); state.itens[novo]={porPessoa:1,unidade:'un'}; save(); renderConsumo(); renderCompras(); };
+  list.appendChild(add);
+
+  list.querySelectorAll('.inp-item-nome').forEach(inp=>inp.addEventListener('change', e=>{
+    const old=e.target.getAttribute('data-item'); const val=e.target.value.trim()||old;
+    if(val!==old){ state.itens[val]=state.itens[old]; delete state.itens[old]; }
+    save(); renderConsumo(); renderCompras();
+  }));
+  list.querySelectorAll('.inp-item-qtd').forEach(inp=>inp.addEventListener('input', e=>{
+    const k=e.target.getAttribute('data-item'); state.itens[k].porPessoa=parseFloat(e.target.value||'0')||0; save(); renderCompras();
+  }));
+  list.querySelectorAll('.inp-item-und').forEach(inp=>inp.addEventListener('input', e=>{
+    const k=e.target.getAttribute('data-item'); state.itens[k].unidade=e.target.value||'un'; save(); renderCompras();
+  }));
+  list.querySelectorAll('.inp-item-adulto').forEach(inp=>inp.addEventListener('change', e=>{
+    const k=e.target.getAttribute('data-item'); state.itens[k].somenteAdulto=e.target.checked; save(); renderCompras();
+  }));
+
+  renderCompras();
+}
+
+function renderCompras(){
+  const confirmados = state.convidados.filter(c=>c.status==="Confirmado").reduce((a,b)=>a+b.qtd,0);
+  const sem = state.convidados.filter(c=>c.status==="Sem resposta").reduce((a,b)=>a+b.qtd,0);
+  const previstosBase = (confirmados + (sem * state.considerarSem/100));
+  const pessoasPrev = Math.round(previstosBase * (1 + state.margem/100));
+  const adultos = Math.round(pessoasPrev * 0.75 * (state.alcoolPerc/100));
+
+  let lista = [];
+  Object.entries(state.itens).forEach(([nome,meta])=>{
+    const basePessoas = meta.somenteAdulto ? adultos : pessoasPrev;
+    let total = (meta.porPessoa || 0) * basePessoas;
+    if(state.duracao>5){
+      const extra = Math.floor((state.duracao-5)/2)*0.15;
+      total = total*(1+extra);
+    }
+    lista.push({nome, unidade: meta.unidade, total});
+  });
+
+  const check = document.getElementById('checklist'); check.innerHTML='';
+  let orc = 0;
+  lista.forEach(item=>{
+    const preco = state.precos[item.nome]?.preco||0;
+    const pack = state.precos[item.nome]?.tamanho||1;
+    const qntPacks = pack>0 ? Math.ceil(item.total/pack) : 0;
+    const subtotal = preco>0 ? (qntPacks*preco) : 0;
+    orc += subtotal;
+    const line = document.createElement('div');
+    line.style.display='grid'; line.style.gridTemplateColumns='1fr .7fr .7fr 1fr'; line.style.gap='8px'; line.style.alignItems='center'; line.style.padding='8px 0'; line.style.borderBottom='1px dashed var(--border)';
+    line.innerHTML = `
+      <div><span style="font-weight:600">${item.nome}</span><div class="note">${item.unidade} • por pessoa: ${state.itens[item.nome].porPessoa}</div></div>
+      <div><div class="pill">Necessário: <b>${item.total.toFixed(2)} ${item.unidade}</b></div></div>
+      <div><div class="pill">Comprar: <b>${qntPacks}</b> un</div></div>
+      <div style="text-align:right"><div class="pill">${preco?('Subtotal: <b>'+money(subtotal)+'</b>'):'Sem preço'}</div></div>`;
+    check.appendChild(line);
+  });
+  document.getElementById('orcamento-total').textContent = money(orc);
+
+  document.getElementById('copiar-lista').onclick = ()=>{
+    const texto = lista.map(item=>{
+      const preco = state.precos[item.nome]?.preco||0;
+      const pack = state.precos[item.nome]?.tamanho||1;
+      const qntPacks = pack>0 ? Math.ceil(item.total/pack) : 0;
+      const subtotal = preco>0 ? (qntPacks*preco) : 0;
+      return `• ${item.nome}: necessário ${item.total.toFixed(2)} ${item.unidade} | comprar ${qntPacks} un ${preco?('| subtotal '+money(subtotal)) : ''}`;
+    }).join('\n');
+    navigator.clipboard.writeText(`Lista de compras — Pagode do Gil 5.0\n${texto}\n\nOrçamento total: ${document.getElementById('orcamento-total').textContent}`);
+    alert('Lista copiada!');
+  };
+  document.getElementById('imprimir').onclick = ()=>{ window.print(); };
+}
+
+// RSVP Admin + Backend
+document.getElementById('salvar-zap').onclick = ()=>{
+  const z = document.getElementById('zap').value.trim();
+  const b = document.getElementById('backend').value.trim();
+  if(z) state.adminZap = z;
+  if(b) state.backendURL = b;
+  save(); alert('Configurações salvas!');
+};
+
+// Backend sync (GET)
+async function syncFromBackend(){
+  if(!state.backendURL){ alert('Configure o Backend em Convite & RSVP.'); return; }
+  try{
+    const url = state.backendURL + (state.backendURL.includes('?')?'&':'?') + 'mode=list';
+    const res = await fetch(url, {method:'GET'});
+    const data = await res.json(); // [{nome,grupo,qtd,status,notas,ts}]
+    // Merge simples: adiciona os que não existem pelo par (nome, ts)
+    const existing = new Set(state.convidados.map(c=> (c.nome+'|'+(c.ts||'')) ));
+    let added = 0;
+    data.forEach(c=>{
+      const key = c.nome+'|'+(c.ts||'');
+      if(!existing.has(key)){
+        state.convidados.push({nome:c.nome,grupo:c.grupo,qtd:+c.qtd||1,status:c.status||'Sem resposta',notas:c.notas||'',ts:c.ts||Date.now()});
+        added++;
+      }
+    });
+    save(); refreshAll();
+    alert(added?(`Sincronizados ${added} novos RSVP(s).`):'Nada novo para sincronizar.');
+  }catch(e){
+    alert('Falha ao sincronizar. Verifique a URL do Backend.');
+  }
+}
+document.getElementById('sync-backend').onclick = syncFromBackend;
+
+// ======= Inicialização =======
+function refreshAll(){ renderConvidados(); renderConsumo(); }
+(function init(){
+  load();
+  if(PARAM_WA){ state.adminZap = '+'+PARAM_WA; save(); }
+  if(PARAM_NAME){ const i=document.getElementById('c-nome'); if(i) i.value=PARAM_NAME; }
+  // Modo convidado
+  if(new URLSearchParams(location.search).get('guest')==='1'){
+    document.getElementById('mode-badge').textContent = 'Convidado';
+    ['convidados','consumo','rsvp','backup'].forEach(id=>show(id,false));
+    show('guest',true); document.getElementById('tabs').style.display='none';
+  }
+  if(state.adminZap){ document.getElementById('zap').value = state.adminZap; }
+  if(state.backendURL){ document.getElementById('backend').value = state.backendURL; }
+  refreshAll();
+
+  // Enviar RSVP (Guest)
+  const guestNote = document.getElementById('guest-note');
+  const enviar = document.getElementById('enviar-rsvp');
+  if(enviar){
+    enviar.onclick = async ()=>{
+      const nome = document.getElementById('c-nome').value.trim();
+      const grupo = document.getElementById('c-grupo').value;
+      const qtd = Math.max(1, parseInt(document.getElementById('c-qtd').value||'1'));
+      const status = document.getElementById('c-status').value;
+      const notas = document.getElementById('c-notas').value.trim();
+      if(!nome) return alert('Informe seu nome');
+
+      // Se houver backend, envia
+      if(state.backendURL){
+        try{
+          const res = await fetch(state.backendURL, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({nome,grupo,qtd,status,notas,ts: Date.now()})
+          });
+          await res.json();
+          guestNote.textContent = "Confirmação enviada ao organizador com sucesso!";
+        }catch(e){
+          guestNote.textContent = "Não foi possível enviar ao organizador. Tente novamente mais tarde.";
+        }
+      }
+
+      // WhatsApp (opcional)
+      const wa = (PARAM_WA || state.adminZap.replace(/[^0-9]/g,''));
+      if(wa){
+        const msg = encodeURIComponent(`Confirmação Pagode do Gil 5.0\nNome: ${nome}\nGrupo: ${grupo}\nPessoas: ${qtd}\nStatus: ${status}\nObs.: ${notas||'-'}`);
+        const link = `https://wa.me/${wa}?text=${msg}`;
+        window.location.href = link;
+      }
+    };
+    if(!state.backendURL){
+      guestNote.textContent = "Dica: o organizador pode ativar envio automático (Google Sheets).";
+    }
+  }
+})();
+</script>
+</body>
+</html>
