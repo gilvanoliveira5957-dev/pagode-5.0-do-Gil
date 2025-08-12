@@ -622,9 +622,7 @@ function refreshAll(){ renderConvidados(); renderConsumo(); }
         }
       }
 
-      // WhatsApp (opcional)
-      const wa = (PARAM_WA || state.adminZap.replace(/[^0-9]/g,''));
-      if(wa){
+    
         const msg = encodeURIComponent(`Confirmação Pagode do Gil 5.0\nNome: ${nome}\nGrupo: ${grupo}\nPessoas: ${qtd}\nStatus: ${status}\nObs.: ${notas||'-'}`);
         const link = `https://wa.me/${wa}?text=${msg}`;
         window.location.href = link;
