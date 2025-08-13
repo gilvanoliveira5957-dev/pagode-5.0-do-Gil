@@ -372,19 +372,7 @@ function renderConvidados(){
   }));
 
   // KPIs por grupo
-  const grupos = ["Família","Amigos","Colegas Bradesco","Diretores Bradesco"];
-  const cont = {}; grupos.forEach(g=>cont[g]={convites:0,pessoas:0});
-  state.convidados.forEach(c=>{
-    if(!cont[c.grupo]) cont[c.grupo]={convites:0,pessoas:0};
-    cont[c.grupo].convites += 1;
-    if(c.status!=="Não irá") cont[c.grupo].pessoas += c.qtd;
-  });
-  const kpis = document.getElementById('kpis'); kpis.innerHTML='';
-  grupos.forEach(g=>{
-    const div = document.createElement('div'); div.className='stat';
-    div.innerHTML = `<span>${g}</span><strong>${cont[g].pessoas} pessoas</strong><span class="note">${cont[g].convites} convites</span>`;
-    kpis.appendChild(div);
-  });
+ 
 
   // Totais
   const totConvites = state.convidados.length;
